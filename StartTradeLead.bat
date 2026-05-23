@@ -1,0 +1,3 @@
+@echo off
+echo Starting Trade Lead System...
+powershell.exe -ExecutionPolicy Bypass -File "D:\CodexProjects\??????\start-app.ps1"
