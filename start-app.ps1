@@ -9,6 +9,8 @@ $LOG_FILE = Join-Path $PROJECT_ROOT "app.log"
 
 $backendProcess = $null
 $frontendProcess = $null
+$cloudflaredBackendProcess = $null
+$cloudflaredFrontendProcess = $null
 $running = $true
 
 function Write-Log {
@@ -115,3 +117,4 @@ while ($script:running) {
 # If we exit, ensure cleanup
 Cleanup
 Unregister-Event -SourceIdentifier PowerShell.Exiting -ErrorAction SilentlyContinue
+
