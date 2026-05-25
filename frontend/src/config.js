@@ -1,4 +1,4 @@
-﻿const API_BASE = import.meta.env.VITE_API_URL || "https://brakes-alphabetical-innovative-nhs.trycloudflare.com";
+﻿const API_BASE = import.meta.env.VITE_API_URL || "https://fanghuhu.pythonanywhere.com";
 export const API = `${API_BASE}/api`;
 
 export function fetchApi(url, options = {}) {
