@@ -1,4 +1,4 @@
-﻿import { useState, useCallback } from "react";
+﻿import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import PipelineBoard from "./pages/PipelineBoard.jsx";
@@ -7,6 +7,7 @@ import AnalyticsDashboard from "./pages/AnalyticsDashboard.jsx";
 import EmailGenerator from "./pages/EmailGenerator.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
+import Home from "./pages/Home.jsx";
 
 const NAV_ITEMS = [
   { id: "dashboard", label: "工作台" },
@@ -34,8 +35,41 @@ function NavButton({ item, active, onClick }) {
 export default function App() {
   const { user, loading, logout } = useAuth();
   const [page, setPage] = useState("dashboard");
-  const [authPage, setAuthPage] = useState("login");
+  const [authPage, setAuthPage] = useState("home");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+
+  // Sync hash with authPage state
+  useEffect(() => {
+    function sync() {
+      const hash = window.location.hash.replace(/^#/, "");
+      if (hash === "login" || hash === "register") {
+        setAuthPage(hash);
+      } else if (hash === "" && (authPage === "login" || authPage === "register")) {
+        setAuthPage("home");
+      }
+    }
+    sync();
+    window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, []);
+
+  // Auto-fill demo credentials from localStorage
+  useEffect(() => {
+    const demo = localStorage.getItem("demo_auto_login");
+    if (demo) {
+      try {
+        const { email, password } = JSON.parse(demo);
+        const form = document.querySelector("form");
+        if (form) {
+          const emailInput = form.querySelector("input[type=email]");
+          const passInput = form.querySelector("input[type=password]");
+          if (emailInput) emailInput.value = email;
+          if (passInput) passInput.value = password;
+        }
+        localStorage.removeItem("demo_auto_login");
+      } catch { /* ignore */ }
+    }
+  }, [authPage]);
 
   const handleSelectCustomer = useCallback((customer) => {
     setSelectedCustomer(customer);
@@ -59,12 +93,15 @@ export default function App() {
     );
   }
 
-  // Not logged in — show auth pages
+  // Not logged in — show landing, login, or register
   if (!user) {
     if (authPage === "register") {
-      return <RegisterPage onSwitch={() => setAuthPage("login")} />;
+      return <RegisterPage onSwitch={() => { window.location.hash = "login"; }} />;
     }
-    return <LoginPage onSwitch={() => setAuthPage("register")} />;
+    if (authPage === "login") {
+      return <LoginPage onSwitch={() => { window.location.hash = "register"; }} />;
+    }
+    return <Home />;
   }
 
   // Logged in — show main app
