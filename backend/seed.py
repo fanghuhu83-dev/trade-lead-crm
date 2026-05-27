@@ -12,11 +12,9 @@ TAG_PALETTES = {
 
 
 def _make_tags(uid, palette_key):
-    tags = {}
     for name, color in TAG_PALETTES[palette_key]:
         t = Tag(user_id=uid, name=name, color=color)
         db.session.add(t)
-        tags[name] = t
     db.session.commit()
     return {t.name: t for t in Tag.query.filter_by(user_id=uid).all()}
 
@@ -70,7 +68,7 @@ def seed_data():
         db.drop_all()
         db.create_all()
 
-    # ── Demo account (original) ──
+    # -- Demo account (original) --
     _seed_user("demo@example.com", "demo123", "Demo Trading Co.", "solar", [
         ("Nordic Solar Components AB","Sweden","procurement@nordicsolar.se","Renewable Energy","solar panel mounting system","won",True,["VIP","EU Distributor"]),
         ("Pacific Homeware Imports","United States","sourcing@pacifichomeware.com","Home Goods","stainless steel kitchenware","contacted",False,[]),
@@ -89,7 +87,7 @@ def seed_data():
         ("Milan Design House Srl","Italy","procurement@milandesign.it","Furniture","leather upholstery","following",False,["EU Distributor"]),
     ])
 
-    # ── 华兴新能源 ──
+    # -- 华兴新能源 --
     _seed_user("admin@huaxing-energy.com", "hx123456", "华兴新能源", "solar", [
         ("SunPower Europe GmbH","Germany","tender@sunpower-eu.de","Renewable Energy","solar panel mounting system","won",True,["VIP","EU Distributor"]),
         ("Helios Nordic AB","Sweden","purchase@heliosnordic.se","Solar Energy","ground mount racking","won",True,["Long-term","OEM Partner"]),
@@ -105,7 +103,7 @@ def seed_data():
         ("Solaris Renewables UK","United Kingdom","buyer@solaris-uk.co.uk","Renewable Energy","solar farm racking","won",True,["VIP","EU Distributor"]),
     ])
 
-    # ── 龙腾机械 ──
+    # -- 龙腾机械 --
     _seed_user("sales@longteng-machinery.com", "lt123456", "龙腾机械", "machinery", [
         ("Bosch Automotive GmbH","Germany","supplier@bosch-auto.de","Automotive","CNC machining parts","won",True,["VIP","Auto Tier-1"]),
         ("Toyota Tsusho Corporation","Japan","procurement@toyota-tsusho.co.jp","Industrial Trading","precision shafts","won",True,["VIP"]),
@@ -119,7 +117,7 @@ def seed_data():
         ("Derwent Foundry Ltd","United Kingdom","buyer@derwent-foundry.co.uk","Metal Casting","sand casting patterns","lost",False,[]),
     ])
 
-    # ── 美康医疗 ──
+    # -- 美康医疗 --
     _seed_user("export@meikang-medical.com", "mk123456", "美康医疗", "medical", [
         ("Medtronic Global Supply","Ireland","gsco@medtronic.com","Medical Devices","surgical instrument components","won",True,["VIP","Hospital Chain"]),
         ("Cardinal Health Inc","United States","sourcing@cardinalhealth.com","Healthcare Distribution","disposable medical gloves","won",True,["VIP","PPE Bulk"]),
@@ -133,7 +131,7 @@ def seed_data():
         ("Apotex Inc","Canada","procurement@apotex.com","Pharmaceutical","cleanroom supplies","lost",False,["Regulatory Pending"]),
     ])
 
-    # ── 鼎丰电子 ──
+    # -- 鼎丰电子 --
     _seed_user("info@dingfeng-electronics.com", "df123456", "鼎丰电子", "electronics", [
         ("Samsung Electro-Mechanics","South Korea","sourcing@samsung-em.com","Electronics","PCB assembly service","contacted",True,["VIP","PCB Buyer"]),
         ("Foxconn Technology Group","Taiwan","supplier@foxconn.com","EMS Manufacturing","flexible PCB","contacted",False,["PCB Buyer","Trial Order"]),
@@ -145,13 +143,13 @@ def seed_data():
         ("Volex plc","United Kingdom","sourcing@volex.com","Cable Assembly","custom cable harness","lost",False,[]),
     ])
 
-    # ── 瑞达包装 ──
+    # -- 瑞达包装 --
     _seed_user("hello@ruida-packaging.com", "rd123456", "瑞达包装", "packaging", [
         ("Nestle Procurement","Switzerland","packaging@nestle.com","Food & Beverage","eco packaging","won",True,["VIP","Food Grade"]),
         ("Unilever Global Sourcing","United Kingdom","sourcing@unilever.com","Consumer Goods","recycled packaging","following",True,["VIP","Retail Chain"]),
         ("Starbucks Supply Chain","United States","packaging@starbucks.com","Coffee Retail","compostable cups","following",False,["Retail Chain"]),
         ("Oatly AB","Sweden","procurement@oatly.com","Plant-based Food","sustainable cartons","contacted",True,["Food Grade","Startup Brand"]),
-        ("Trader Joe''s","United States","private-label@traderjoes.com","Grocery Retail","branded packaging","contacted",False,["Retail Chain"]),
+        ("Trader Joe's","United States","private-label@traderjoes.com","Grocery Retail","branded packaging","contacted",False,["Retail Chain"]),
         ("Beyond Meat","United States","supply@beyondmeat.com","Plant Protein","biodegradable trays","potential",False,["Startup Brand"]),
         ("Aldi Sud","Germany","verpackung@aldi-sued.de","Discount Retail","cost-optimized packaging","potential",False,["Retail Chain"]),
         ("Just Eat Takeaway","Netherlands","sustainability@takeaway.com","Food Delivery","delivery packaging","lost",False,[]),

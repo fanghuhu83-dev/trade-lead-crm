@@ -8,6 +8,7 @@ import EmailGenerator from "./pages/EmailGenerator.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import Home from "./pages/Home.jsx";
+import EmailHistory from "./pages/EmailHistory.jsx";
 
 const NAV_ITEMS = [
   { id: "dashboard", label: "工作台" },
@@ -15,6 +16,7 @@ const NAV_ITEMS = [
   { id: "customers", label: "客户管理" },
   { id: "analytics", label: "数据分析" },
   { id: "email", label: "AI 邮件生成" },
+  { id: "emails", label: "邮件历史" },
 ];
 
 function NavButton({ item, active, onClick }) {
@@ -37,6 +39,7 @@ export default function App() {
   const [page, setPage] = useState("dashboard");
   const [authPage, setAuthPage] = useState("home");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [emailPrefill, setEmailPrefill] = useState(null);
 
   // Sync hash with authPage state
   useEffect(() => {
@@ -80,6 +83,11 @@ export default function App() {
     setPage("pipeline");
   }, []);
 
+  const handleSendEmail = useCallback((customer) => {
+    setEmailPrefill(customer);
+    setPage("email");
+  }, []);
+
   // Loading state
   if (loading) {
     return (
@@ -93,7 +101,7 @@ export default function App() {
     );
   }
 
-  // Not logged in — show landing, login, or register
+  // Not logged in -- show landing, login, or register
   if (!user) {
     if (authPage === "register") {
       return <RegisterPage onSwitch={() => { window.location.hash = "login"; }} />;
@@ -104,7 +112,7 @@ export default function App() {
     return <Home />;
   }
 
-  // Logged in — show main app
+  // Logged in -- show main app
   const renderPage = () => {
     switch (page) {
       case "dashboard":
@@ -112,11 +120,11 @@ export default function App() {
       case "pipeline":
         return <PipelineBoard onSelectCustomer={handleSelectCustomer} />;
       case "customers":
-        return <CustomerManagement />;
+        return <CustomerManagement onSendEmail={handleSendEmail} />;
       case "analytics":
         return <AnalyticsDashboard />;
       case "email":
-        return <EmailGenerator />;
+        return <EmailGenerator prefill={emailPrefill} onConsumed={() => setEmailPrefill(null)} />;
       default:
         return <Dashboard onSelectCustomer={handleSelectCustomer} onNavToPipeline={handleNavToPipeline} />;
     }
@@ -182,3 +190,4 @@ export default function App() {
     </div>
   );
 }
+

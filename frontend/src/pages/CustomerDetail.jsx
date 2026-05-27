@@ -16,6 +16,12 @@ const ACTION_ICONS = {
   followup_added: "✎",
 };
 
+function formatDateShort(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleDateString("zh-CN", { month: "short", day: "numeric" });
+}
+
 function formatDate(iso) {
   const d = new Date(iso);
   return d.toLocaleDateString("zh-CN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -133,9 +139,13 @@ export default function CustomerDetail({ customerId, onClose }) {
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               {[
+                { label: "联系人", value: data.contactName || "—" },
                 { label: "邮箱", value: data.email || "—" },
+                { label: "电话", value: data.phone || "—" },
                 { label: "网站", value: data.website || "—" },
+                { label: "客户来源", value: data.source || "—" },
                 { label: "产品关键词", value: data.productKeyword || "—" },
+                { label: "下次跟进", value: formatDateShort(data.nextFollowUp) },
                 { label: "标签", value: data.tags.length > 0 ? data.tags.map((t) => t.name).join(", ") : "—" },
                 { label: "创建时间", value: formatDate(data.createdAt) },
                 { label: "更新时间", value: formatDate(data.updatedAt) },
@@ -199,3 +209,4 @@ export default function CustomerDetail({ customerId, onClose }) {
     </div>
   );
 }
+

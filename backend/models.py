@@ -47,6 +47,10 @@ class Customer(db.Model):
     country = db.Column(db.String(100), default="")
     industry = db.Column(db.String(200), default="")
     product_keyword = db.Column(db.String(200), default="")
+    contact_name = db.Column(db.String(100), default="")
+    phone = db.Column(db.String(50), default="")
+    source = db.Column(db.String(50), default="")
+    next_follow_up = db.Column(db.DateTime, nullable=True, default=None)
     status = db.Column(db.String(20), nullable=False, default="potential")
     notes = db.Column(db.Text, default="")
     favorite = db.Column(db.Boolean, default=False)
@@ -67,6 +71,10 @@ class Customer(db.Model):
             "country": self.country,
             "industry": self.industry,
             "productKeyword": self.product_keyword,
+            "contactName": self.contact_name,
+            "phone": self.phone,
+            "source": self.source,
+            "nextFollowUp": self.next_follow_up.isoformat() if self.next_follow_up else None,
             "status": self.status,
             "notes": self.notes,
             "favorite": self.favorite,
@@ -138,8 +146,44 @@ class ActivityLog(db.Model):
         }
 
 
+
+class GeneratedEmail(db.Model):
+    __tablename__ = "generated_emails"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    company_name = db.Column(db.String(200), default="")
+    product_name = db.Column(db.String(200), default="")
+    country = db.Column(db.String(100), default="")
+    industry = db.Column(db.String(200), default="")
+    contact_name = db.Column(db.String(100), default="")
+    scene = db.Column(db.String(30), default="first_contact")
+    tone = db.Column(db.String(20), default="neutral")
+    style = db.Column(db.String(20), default="concise")
+    body = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=utc_now)
+
+    user = db.relationship("User", backref="generated_emails")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "companyName": self.company_name,
+            "productName": self.product_name,
+            "country": self.country,
+            "industry": self.industry,
+            "contactName": self.contact_name,
+            "scene": self.scene,
+            "tone": self.tone,
+            "style": self.style,
+            "body": self.body,
+            "createdAt": self.created_at.isoformat(),
+        }
+
+
 customer_tags = db.Table(
     "customer_tags",
     db.Column("customer_id", db.Integer, db.ForeignKey("customers.id"), primary_key=True),
     db.Column("tag_id", db.Integer, db.ForeignKey("tags.id"), primary_key=True),
 )
+

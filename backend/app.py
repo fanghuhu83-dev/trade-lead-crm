@@ -8,6 +8,8 @@ from models import db
 from routes.customers import customers_bp
 from routes.email_generator import email_gen_bp
 from routes.analytics import analytics_bp
+from routes.emails import emails_bp
+from routes.export_routes import export_bp
 from routes.auth import auth_bp
 
 
@@ -25,6 +27,8 @@ def create_app():
     app.register_blueprint(customers_bp, url_prefix="/api/customers")
     app.register_blueprint(email_gen_bp, url_prefix="/api/email/generate")
     app.register_blueprint(analytics_bp, url_prefix="/api/analytics")
+    app.register_blueprint(emails_bp, url_prefix="/api/emails")
+    app.register_blueprint(export_bp, url_prefix="/api/export")
 
     @app.get("/api/health")
     def health_check():
@@ -61,3 +65,4 @@ app = create_app()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+

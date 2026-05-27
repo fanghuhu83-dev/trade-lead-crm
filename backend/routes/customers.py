@@ -1,11 +1,14 @@
 ﻿import csv
 import io
+from datetime import datetime
 from flask import Blueprint, jsonify, request, Response, g
 from models import db, Customer, FollowUp, Tag, ActivityLog
 from config import ALLOWED_STATUSES, STATUS_LABELS
 from middleware import login_required
 
 customers_bp = Blueprint("customers", __name__)
+
+SOURCES = ["Alibaba", "LinkedIn", "展会", "Google", "老客户推荐", "其他"]
 
 
 def _get_customer(customer_id):
@@ -20,7 +23,17 @@ def _log_activity(customer_id, action, detail=""):
     db.session.add(log)
 
 
-# ── LIST ──────────────────────────────────────────
+def _parse_date(value):
+    """Parse ISO date string (date-only or datetime) to a Python date."""
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except (ValueError, TypeError):
+        return None
+
+
+# -- LIST --
 
 @customers_bp.get("")
 @login_required
@@ -43,6 +56,7 @@ def list_customers():
                 Customer.company_name.ilike(like), Customer.email.ilike(like),
                 Customer.website.ilike(like), Customer.country.ilike(like),
                 Customer.industry.ilike(like), Customer.product_keyword.ilike(like),
+                Customer.contact_name.ilike(like),
             )
         )
 
@@ -65,7 +79,7 @@ def list_customers():
     return jsonify({"data": [c.to_dict() for c in customers], "total": len(customers)})
 
 
-# ── CREATE ────────────────────────────────────────
+# -- CREATE --
 
 @customers_bp.post("")
 @login_required
@@ -84,6 +98,10 @@ def create_customer():
         country=(payload.get("country") or "").strip(),
         industry=(payload.get("industry") or "").strip(),
         product_keyword=(payload.get("productKeyword") or "").strip(),
+        contact_name=(payload.get("contactName") or "").strip(),
+        phone=(payload.get("phone") or "").strip(),
+        source=(payload.get("source") or "").strip(),
+        next_follow_up=_parse_date(payload.get("nextFollowUp")),
         status=payload.get("status", "potential"),
         notes=(payload.get("notes") or "").strip(),
     )
@@ -102,7 +120,7 @@ def create_customer():
     return jsonify({"data": customer.to_dict()}), 201
 
 
-# ── GET ONE ───────────────────────────────────────
+# -- GET ONE --
 
 @customers_bp.get("/<int:customer_id>")
 @login_required
@@ -117,7 +135,7 @@ def get_customer(customer_id):
     return jsonify({"data": data})
 
 
-# ── UPDATE ────────────────────────────────────────
+# -- UPDATE --
 
 @customers_bp.put("/<int:customer_id>")
 @login_required
@@ -133,10 +151,14 @@ def update_customer(customer_id):
     for field, attr in [
         ("companyName", "company_name"), ("website", "website"), ("email", "email"),
         ("country", "country"), ("industry", "industry"),
-        ("productKeyword", "product_keyword"), ("notes", "notes"),
+        ("productKeyword", "product_keyword"), ("contactName", "contact_name"),
+        ("phone", "phone"), ("source", "source"), ("notes", "notes"),
     ]:
         if field in payload:
             setattr(c, attr, (payload[field] or "").strip())
+
+    if "nextFollowUp" in payload:
+        c.next_follow_up = _parse_date(payload["nextFollowUp"])
 
     if "status" in payload and payload["status"] in ALLOWED_STATUSES:
         if payload["status"] != c.status:
@@ -154,7 +176,7 @@ def update_customer(customer_id):
     return jsonify({"data": c.to_dict()})
 
 
-# ── DELETE ────────────────────────────────────────
+# -- DELETE --
 
 @customers_bp.delete("/<int:customer_id>")
 @login_required
@@ -169,7 +191,7 @@ def delete_customer(customer_id):
     return "", 204
 
 
-# ── STATUS ────────────────────────────────────────
+# -- STATUS --
 
 @customers_bp.patch("/<int:customer_id>/status")
 @login_required
@@ -193,7 +215,7 @@ def update_status(customer_id):
     return jsonify({"data": c.to_dict()})
 
 
-# ── BATCH STATUS ──────────────────────────────────
+# -- BATCH STATUS --
 
 @customers_bp.patch("/batch/status")
 @login_required
@@ -220,7 +242,7 @@ def batch_update_status():
     return jsonify({"data": {"updated": len(customers)}})
 
 
-# ── FAVORITE ──────────────────────────────────────
+# -- FAVORITE --
 
 @customers_bp.patch("/<int:customer_id>/favorite")
 @login_required
@@ -235,7 +257,7 @@ def toggle_favorite(customer_id):
     return jsonify({"data": c.to_dict()})
 
 
-# ── EXPORT CSV ────────────────────────────────────
+# -- EXPORT CSV --
 
 @customers_bp.get("/export/csv")
 @login_required
@@ -247,11 +269,14 @@ def export_csv():
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow(["ID", "Company Name", "Website", "Email", "Country", "Industry",
-                     "Product Keyword", "Status", "Tags", "Favorited", "Created At", "Updated At"])
+                     "Product Keyword", "Contact Name", "Phone", "Source", "Next Follow Up",
+                     "Status", "Tags", "Favorited", "Created At", "Updated At"])
     for c in customers:
         writer.writerow([
             c.id, c.company_name, c.website, c.email, c.country, c.industry,
-            c.product_keyword, STATUS_LABELS.get(c.status, c.status),
+            c.product_keyword, c.contact_name, c.phone, c.source,
+            c.next_follow_up.strftime("%Y-%m-%d") if c.next_follow_up else "",
+            STATUS_LABELS.get(c.status, c.status),
             ", ".join(t.name for t in c.tags),
             "Yes" if c.favorite else "No",
             c.created_at.strftime("%Y-%m-%d %H:%M"),
@@ -262,7 +287,7 @@ def export_csv():
                     headers={"Content-Disposition": "attachment; filename=customers_export.csv"})
 
 
-# ── FOLLOWUPS ─────────────────────────────────────
+# -- FOLLOWUPS --
 
 @customers_bp.get("/<int:customer_id>/followups")
 @login_required
@@ -292,7 +317,7 @@ def create_followup(customer_id):
     return jsonify({"data": fu.to_dict()}), 201
 
 
-# ── TAGS ──────────────────────────────────────────
+# -- TAGS --
 
 @customers_bp.get("/tags/list")
 @login_required
@@ -321,4 +346,3 @@ def create_tag():
     db.session.add(tag)
     db.session.commit()
     return jsonify({"data": tag.to_dict()}), 201
-
