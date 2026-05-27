@@ -8,6 +8,24 @@ export default function LoginPage({ onSwitch }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  
+  async function handleDemoLogin(e) {
+    e.preventDefault();
+    setError("");
+    setEmail("demo@example.com");
+    setPassword("demo123456");
+    setTimeout(async () => {
+      setLoading(true);
+      try {
+        await login("demo@example.com", "demo123456");
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }, 100);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
@@ -69,6 +87,25 @@ export default function LoginPage({ onSwitch }) {
             没有账号？{" "}
             <button type="button" onClick={onSwitch} className="font-medium text-indigo-600 hover:text-indigo-700">立即注册</button>
           </p>
+          <div className="relative mt-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-white px-2 text-slate-400">或</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleDemoLogin}
+            disabled={loading}
+            className="mt-4 w-full rounded-lg border border-slate-200 bg-white py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50 transition"
+          >
+            {loading ? "登录中..." : "使用演示账号快速登录"}
+          </button>
+
+          <p className="mt-2 text-center text-[11px] text-slate-400">演示账号数据每24小时自动重置</p>
         </form>
       </div>
     </div>

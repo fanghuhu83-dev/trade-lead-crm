@@ -17,6 +17,10 @@ def create_app():
 
     init_db(app)
 
+    from demo_seed import ensure_demo_user
+    with app.app_context():
+        ensure_demo_user()
+
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(customers_bp, url_prefix="/api/customers")
     app.register_blueprint(email_gen_bp, url_prefix="/api/email/generate")

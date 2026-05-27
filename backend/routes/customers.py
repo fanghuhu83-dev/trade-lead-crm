@@ -125,6 +125,8 @@ def update_customer(customer_id):
     c = _get_customer(customer_id)
     if not c:
         return jsonify({"error": "Customer not found."}), 404
+    if g.current_user.email == "demo@example.com":
+        return jsonify({"error": "演示账号不支持删除和修改操作"}), 403
 
     payload = request.get_json(silent=True) or {}
 
@@ -160,6 +162,8 @@ def delete_customer(customer_id):
     c = _get_customer(customer_id)
     if not c:
         return jsonify({"error": "Customer not found."}), 404
+    if g.current_user.email == "demo@example.com":
+        return jsonify({"error": "演示账号不支持删除和修改操作"}), 403
     db.session.delete(c)
     db.session.commit()
     return "", 204
@@ -173,6 +177,8 @@ def update_status(customer_id):
     c = _get_customer(customer_id)
     if not c:
         return jsonify({"error": "Customer not found."}), 404
+    if g.current_user.email == "demo@example.com":
+        return jsonify({"error": "演示账号不支持删除和修改操作"}), 403
 
     payload = request.get_json(silent=True) or {}
     status = payload.get("status")
@@ -193,6 +199,8 @@ def update_status(customer_id):
 @login_required
 def batch_update_status():
     payload = request.get_json(silent=True) or {}
+    if g.current_user.email == "demo@example.com":
+        return jsonify({"error": "演示账号不支持删除和修改操作"}), 403
     ids = payload.get("ids", [])
     status = payload.get("status")
 
@@ -220,6 +228,8 @@ def toggle_favorite(customer_id):
     c = _get_customer(customer_id)
     if not c:
         return jsonify({"error": "Customer not found."}), 404
+    if g.current_user.email == "demo@example.com":
+        return jsonify({"error": "演示账号不支持删除和修改操作"}), 403
     c.favorite = not c.favorite
     db.session.commit()
     return jsonify({"data": c.to_dict()})
@@ -311,3 +321,4 @@ def create_tag():
     db.session.add(tag)
     db.session.commit()
     return jsonify({"data": tag.to_dict()}), 201
+
