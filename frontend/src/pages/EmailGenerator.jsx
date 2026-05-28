@@ -434,7 +434,7 @@ export default function EmailGenerator({ prefill, onConsumed }) {
                     <button onClick={handleExportWord} className="inline-flex items-center gap-1 rounded-lg border border-indigo-200 px-3 py-1.5 text-[11px] font-medium text-indigo-600 hover:bg-indigo-50 transition">
                       导出 Word
                     </button>
-                  </button>
+                  )}
                   <button onClick={handleGenerate} disabled={loading} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition">
                     重新生成
                   </button>
@@ -458,5 +458,6 @@ export default function EmailGenerator({ prefill, onConsumed }) {
     </main>
   );
 }
+
 
 
